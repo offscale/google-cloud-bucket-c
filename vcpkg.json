@@ -1,0 +1,13 @@
+{
+  "name": "google-cloud-bucket-c",
+  "version-string": "0.0.1",
+  "dependencies": [
+    {
+      "name": "google-cloud-cpp",
+      "default-features": false,
+      "features": [
+        "storage"
+      ]
+    }
+  ]
+}
