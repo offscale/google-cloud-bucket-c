@@ -6,8 +6,8 @@
 extern "C" {
 #else
 #include <stdlib.h>
-#endif
 #include <acquire_stdbool.h>
+#endif
 
 #if defined(_MSC_VER)
 #include <BaseTsd.h>
@@ -72,19 +72,19 @@ struct InstanceIncomplete {
     bool supportsPzs;
 };
 
-extern GOOGLE_CLOUD_C_COMMON_EXPORT const struct StatusAndCstr StatusAndCstrNull;
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT const struct StatusAndCstr StatusAndCstrNull;
 
-extern GOOGLE_CLOUD_C_COMMON_EXPORT const struct StatusAndArrayCStrArray StatusAndArrayCStrArrayNull;
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT const struct StatusAndArrayCStrArray StatusAndArrayCStrArrayNull;
 
-extern GOOGLE_CLOUD_C_COMMON_EXPORT const struct StatusAndCstrAndCStr StatusAndCstrAndCStrNull;
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT const struct StatusAndCstrAndCStr StatusAndCstrAndCStrNull;
 
-extern GOOGLE_CLOUD_C_COMMON_EXPORT void cleanup_struct_cstr_array(struct StatusAndArrayCStrArray *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_cstr_array(struct StatusAndArrayCStrArray *);
 
-extern GOOGLE_CLOUD_C_COMMON_EXPORT void cleanup_struct_cstr(struct StatusAndCstr *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_cstr(struct StatusAndCstr *);
 
-extern GOOGLE_CLOUD_C_COMMON_EXPORT void cleanup_struct_cstr_cstr(struct StatusAndCstrAndCStr *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_cstr_cstr(struct StatusAndCstrAndCStr *);
 
-extern GOOGLE_CLOUD_C_COMMON_EXPORT void cleanup_struct_array(struct ErrorOrIntArray *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_array(struct ErrorOrIntArray *);
 
 struct configuration {
     const char *google_access_token;
@@ -99,7 +99,7 @@ struct configuration {
     const char *folder_path;
 };
 
-extern GOOGLE_CLOUD_C_COMMON_EXPORT void cleanup_struct_configuration(struct configuration *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_configuration(struct configuration *);
 
 #ifdef __cplusplus
 }

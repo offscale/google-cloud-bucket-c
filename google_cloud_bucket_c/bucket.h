@@ -1,8 +1,6 @@
 #ifndef PP_BUCKET_H
 #define PP_BUCKET_H
 
-#include <types_common.h>
-
 #ifdef	__cplusplus
 #include <cstdbool>
 extern "C" {

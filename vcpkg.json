@@ -4,7 +4,7 @@
   "dependencies": [
     {
       "name": "google-cloud-cpp",
-      "default-features": false,
+      "default-features": true,
       "features": [
         "storage"
       ]
