@@ -47,8 +47,11 @@ jobs:
         working-directory: ./build
         run: |
           cmake -DCMAKE_TOOLCHAIN_FILE="vcpkg/scripts/buildsystems/vcpkg.cmake" ..
-        shell: cmd
         if: matrix.os != 'windows-latest'
+
+      - name: build
+        working-directory: ./build
+        run: cmake --build .
 
 #      - name: test
 #        working-directory: ./build
