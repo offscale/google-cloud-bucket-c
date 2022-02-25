@@ -175,6 +175,59 @@ int add_file_to_bucket(const char *google_access_token, const char *google_bucke
     }
 }
 
+struct StatusAndArrayCStrArray add_directory_to_bucket(const char *google_access_token, const char *google_bucket_name, const char *folder_path) {
+    /* Consider: Concurrency + some sort of directory lock? -
+     * And/or compression? - (zlib stuff is already done via the google cpp client)
+     * And even split into multi files, to combine with concurrency?
+     * Or go harder and implement à la rsync?
+     * */
+    char full_path[PATH_MAX];
+    std::vector<const char*> uploaded;
+#if defined(_WIN32) || defined(__WIN32__) || defined(__WINDOWS__)
+    {
+                HANDLE hFind;
+                WIN32_FIND_DATA FindFileData;
+                char wild_folder_path[PATH_MAX];
+                strcpy_s(wild_folder_path, PATH_MAX, config->folder_path);
+                strcat_s(wild_folder_path, PATH_MAX, "\\*\0");
+
+                if ((hFind = FindFirstFile(wild_folder_path, &FindFileData)) != INVALID_HANDLE_VALUE) {
+                    do {
+                        ZeroMemory(&full_path, sizeof(full_path));
+                        strcpy_s(full_path, PATH_MAX, config->folder_path);
+                        strcat_s(full_path, PATH_MAX, "\\");
+                        strcat_s(full_path, PATH_MAX, FindFileData.cFileName);
+                        add_file_to_bucket(google_access_token, google_bucket_name, dir->d_name, full_path);
+                    } while (FindNextFile(hFind, &FindFileData));
+                    FindClose(hFind);
+                }
+            }
+#else
+    {
+        DIR *d = opendir(folder_path);
+        struct dirent *dir;
+        if (d) {
+            while ((dir = readdir(d)) != NULL)
+                if (dir->d_type == DT_REG) {
+                    memset(&full_path, 0, sizeof(full_path));
+                    strcpy(full_path, folder_path);
+                    strcat(full_path, "/");
+                    strcat(full_path, dir->d_name);
+                    /* TODO: Handle errors from `add_file_to_bucket` */
+                    add_file_to_bucket(google_access_token, google_bucket_name, dir->d_name, full_path);
+                }
+            closedir(d);
+        }
+    }
+#endif
+    char **uploaded_c_str = reinterpret_cast<char **>( malloc( sizeof( char * ) * uploaded.size() ));
+    for( size_t i = 0; i < uploaded.size(); ++i )
+        uploaded_c_str[i] = strdup(uploaded[i]);
+
+    const struct StatusAndArrayCStrArray statusAndArrayCStrArray = {EXIT_SUCCESS, uploaded_c_str, uploaded.size()};
+    return statusAndArrayCStrArray;
+}
+
 
 struct StatusAndArrayCStrArray storage(const struct configuration *const config, const char *kind, bool list_only)  {
     static google::cloud::storage::Client client = google::cloud::storage::Client(
