@@ -25,7 +25,7 @@ target_link_libraries("${LIBRARY_NAME}" PRIVATE "${PROJECT_NAME}_common")
 find_package(google_cloud_cpp_storage CONFIG REQUIRED)
 target_link_libraries(
         "${LIBRARY_NAME}"
-        PRIVATE
+        PUBLIC
         "google-cloud-cpp::storage"
         "google-cloud-cpp::experimental-storage-grpc"
 )
