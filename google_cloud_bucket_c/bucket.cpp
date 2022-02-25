@@ -75,7 +75,7 @@ extern int download_file(const struct configuration *config,
     }
 }
 
-void upload_file_to_bucket(const struct configuration *const config,
+int upload_file_to_bucket(const struct configuration *const config,
                            const char *object_name,
                            const char *file_name,
                            std::vector<const char*> &uploaded,
@@ -86,9 +86,95 @@ void upload_file_to_bucket(const struct configuration *const config,
     if (status.ok()) {
         std::cout << "Successfully created object:\t" << status.value().id() << '\n';
         uploaded.push_back(strdup(file_name));
-    } else
+        return EXIT_SUCCESS;
+    } else {
         std::cerr << "Error creating object:\t" << status.status().message() << std::endl;
+        return EXIT_FAILURE;
+    }
 }
+
+StatusAndArrayCStrArray list_buckets(const char *google_access_token, const char *google_project_id) {
+    static google::cloud::storage::Client client = google::cloud::storage::Client(
+            std::make_unique<OutOfBandCredentials>(
+                    OutOfBandCredentials(
+                            google_access_token,
+                            google::cloud::storage::oauth2::ServiceAccountCredentialsInfo{/* TODO */})
+            )
+    );
+
+    google::cloud::storage::ListBucketsReader bucketsReader = client.ListBucketsForProject(google_project_id);
+    std::vector<const char *> bucketNames;
+    for (const auto &bucket : bucketsReader) {
+        /* bucket->label */
+        if (!bucket) {
+            fputs(bucket.status().message().c_str(), stderr);
+            return {
+                    EXIT_FAILURE,
+                    NULL,
+                    0
+            };
+        }
+        printf("Bucket name: \"%s\"\t# of labels: %lu\n",
+               bucket->name().c_str(), bucket->labels().size());
+        bucketNames.push_back(strdup(bucket->name().c_str()));
+    }
+    char **bucket_names_c_str = reinterpret_cast<char **>( malloc( sizeof( char * ) * bucketNames.size() ));
+    for( size_t i = 0; i < bucketNames.size(); ++i )
+        bucket_names_c_str[i] = strdup( bucketNames[i] );
+
+    const struct StatusAndArrayCStrArray bucketNamesReturn = {
+            EXIT_SUCCESS,
+            bucket_names_c_str,
+            bucketNames.size()
+    };
+    return bucketNamesReturn;
+}
+
+int create_bucket(const char *google_access_token, const char *google_project_id,
+                  const char *google_bucket_name, const char *google_region) {
+    static google::cloud::storage::Client client = google::cloud::storage::Client(
+            std::make_unique<OutOfBandCredentials>(
+                    OutOfBandCredentials(
+                            google_access_token,
+                            google::cloud::storage::oauth2::ServiceAccountCredentialsInfo{/* TODO */})
+            )
+    );
+
+    const google::cloud::StatusOr<google::cloud::storage::BucketMetadata> bucket =
+            client.CreateBucketForProject(google_bucket_name, google_project_id,
+                                          google::cloud::storage::BucketMetadata()
+                                                  .set_location(google_region)
+                                                  .set_storage_class(
+                                                          google::cloud::storage::storage_class::Regional()));
+    if (bucket.ok()) {
+        printf("Successfully created bucket:\t%s\n", bucket.value().id().c_str());
+        return EXIT_SUCCESS;
+    } else {
+        fprintf(stderr, "Error creating bucket:\t%s\n", bucket.status().message().c_str());
+        return EXIT_FAILURE;
+    }
+}
+
+int add_file_to_bucket(const char *google_access_token, const char *google_bucket_name, const char *object_name, const char *file_name) {
+    static google::cloud::storage::Client client = google::cloud::storage::Client(
+            std::make_unique<OutOfBandCredentials>(
+                    OutOfBandCredentials(
+                            google_access_token,
+                            google::cloud::storage::oauth2::ServiceAccountCredentialsInfo{/* TODO */})
+            )
+    );
+    const google::cloud::StatusOr<google::cloud::storage::ObjectMetadata> status = client.UploadFile(
+            file_name, google_bucket_name, object_name
+    );
+    if (status.ok()) {
+        printf("Successfully created object:\t%s\n", status.value().id().c_str());
+        return EXIT_SUCCESS;
+    } else {
+        fprintf(stderr, "Error creating object:\t%s\n", status.status().message().c_str());
+        return EXIT_FAILURE;
+    }
+}
+
 
 struct StatusAndArrayCStrArray storage(const struct configuration *const config, const char *kind, bool list_only)  {
     static google::cloud::storage::Client client = google::cloud::storage::Client(
