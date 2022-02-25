@@ -9,7 +9,7 @@ extern "C" {
 #endif
 
 #include <google_cloud_bucket_c_export.h>
-#include <types_common.h>
+#include <gcloud_bucket_c_types_common.h>
 
 extern GOOGLE_CLOUD_BUCKET_C_EXPORT int download_file(const struct configuration *, const char *, const char *);
 extern GOOGLE_CLOUD_BUCKET_C_EXPORT struct StatusAndArrayCStrArray storage(const struct configuration *, const char *, bool);

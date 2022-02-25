@@ -1,3 +1,4 @@
+/* TODO: Figure out where this goes, e.g., its own repo + separate vcpkg port */
 /*
  * stdbool isn't always included with every popular C89 implementation
  *

@@ -1,3 +1,4 @@
+/* TODO: Figure out where this goes, e.g., its own repo + separate vcpkg port */
 #ifndef PP_TYPES_COMMON_H
 #define PP_TYPES_COMMON_H
 
@@ -6,7 +7,7 @@
 extern "C" {
 #else
 #include <stdlib.h>
-#include <acquire_stdbool.h>
+#include <gcloud_bucket_c_stdbool.h>
 #endif
 
 #if defined(_MSC_VER)
