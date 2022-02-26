@@ -13,7 +13,7 @@ It's very popular, and has strong CMake integration. Henceforth, it is chosen fo
 
 [Install vcpkg](https://vcpkg.io/en/getting-started.html), configure it with your system. Then run:
 
-    [root]/vcpkg/vcpkg install curl
+    [root]/vcpkg/vcpkg install google-cloud-cpp c89stringutils
 
 Or do the same with your system package manager, `conan`, or whatever else you use.
 

@@ -14,6 +14,9 @@
 #else
 #include <dirent.h>
 #endif
+#define C89STRINGUTILS_IMPLEMENTATION
+#include <c89stringutils_string_extras.h>
+#undef C89STRINGUTILS_IMPLEMENTATION
 
 class OutOfBandCredentials: public google::cloud::storage::oauth2::Credentials {
 public:
@@ -188,15 +191,15 @@ struct StatusAndArrayCStrArray add_directory_to_bucket(const char *google_access
                 HANDLE hFind;
                 WIN32_FIND_DATA FindFileData;
                 char wild_folder_path[PATH_MAX];
-                strcpy_s(wild_folder_path, PATH_MAX, config->folder_path);
-                strcat_s(wild_folder_path, PATH_MAX, "\\*\0");
+                ZeroMemory(&wild_folder_path, sizeof(full_path));
+                asprintf(&wild_folder_path, "%s%s",
+                         config->folder_path, "\\*\0");
 
                 if ((hFind = FindFirstFile(wild_folder_path, &FindFileData)) != INVALID_HANDLE_VALUE) {
                     do {
                         ZeroMemory(&full_path, sizeof(full_path));
-                        strcpy_s(full_path, PATH_MAX, config->folder_path);
-                        strcat_s(full_path, PATH_MAX, "\\");
-                        strcat_s(full_path, PATH_MAX, FindFileData.cFileName);
+                        asprintf(&full_path, "%s\\%s",
+                                 config->folder_path, FindFileData.cFileName);
                         add_file_to_bucket(google_access_token, google_bucket_name, dir->d_name, full_path);
                     } while (FindNextFile(hFind, &FindFileData));
                     FindClose(hFind);
@@ -210,9 +213,8 @@ struct StatusAndArrayCStrArray add_directory_to_bucket(const char *google_access
             while ((dir = readdir(d)) != NULL)
                 if (dir->d_type == DT_REG) {
                     memset(&full_path, 0, sizeof(full_path));
-                    strcpy(full_path, folder_path);
-                    strcat(full_path, "/");
-                    strcat(full_path, dir->d_name);
+                    asprintf(&full_path, "%s/%s",
+                             folder_path, dir->d_name);
                     /* TODO: Handle errors from `add_file_to_bucket` */
                     add_file_to_bucket(google_access_token, google_bucket_name, dir->d_name, full_path);
                 }

@@ -25,9 +25,16 @@ target_link_libraries("${LIBRARY_NAME}" PRIVATE "${PROJECT_NAME}_common")
 find_package(google_cloud_cpp_storage CONFIG REQUIRED)
 target_link_libraries(
         "${LIBRARY_NAME}"
-        PUBLIC
+        PRIVATE
         "google-cloud-cpp::storage"
         "google-cloud-cpp::experimental-storage-grpc"
+)
+
+find_path(C89STRINGUTILS_INCLUDE_DIRS "c89stringutils_string_extras.h")
+target_include_directories(
+        "${LIBRARY_NAME}"
+        PRIVATE
+        "${C89STRINGUTILS_INCLUDE_DIRS}"
 )
 
 set_target_properties(

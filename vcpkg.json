@@ -8,6 +8,7 @@
       "features": [
         "storage"
       ]
-    }
+    },
+    "c89stringutils"
   ]
 }
