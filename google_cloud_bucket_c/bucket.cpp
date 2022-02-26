@@ -11,12 +11,11 @@
 #include <string.h>
 #define strdup _strdup
 #define PATH_MAX MAX_PATH
+#define NUM_FORMAT "zu"
 #else
+#define NUM_FORMAT "lu"
 #include <dirent.h>
 #endif
-#define C89STRINGUTILS_IMPLEMENTATION
-#include <c89stringutils_string_extras.h>
-#undef C89STRINGUTILS_IMPLEMENTATION
 
 class OutOfBandCredentials: public google::cloud::storage::oauth2::Credentials {
 public:
@@ -117,7 +116,7 @@ StatusAndArrayCStrArray list_buckets(const char *google_access_token, const char
                     0
             };
         }
-        printf("Bucket name: \"%s\"\t# of labels: %lu\n",
+        printf("Bucket name: \"%s\"\t# of labels: %" NUM_FORMAT "\n",
                bucket->name().c_str(), bucket->labels().size());
         bucketNames.push_back(strdup(bucket->name().c_str()));
     }
@@ -178,7 +177,9 @@ int add_file_to_bucket(const char *google_access_token, const char *google_bucke
     }
 }
 
-struct StatusAndArrayCStrArray add_directory_to_bucket(const char *google_access_token, const char *google_bucket_name, const char *folder_path) {
+struct StatusAndArrayCStrArray add_directory_to_bucket(const char *google_access_token,
+                                                       const char *google_bucket_name,
+                                                       const char *folder_path) {
     /* Consider: Concurrency + some sort of directory lock? -
      * And/or compression? - (zlib stuff is already done via the google cpp client)
      * And even split into multi files, to combine with concurrency?
@@ -192,15 +193,15 @@ struct StatusAndArrayCStrArray add_directory_to_bucket(const char *google_access
                 WIN32_FIND_DATA FindFileData;
                 char wild_folder_path[PATH_MAX];
                 ZeroMemory(&wild_folder_path, sizeof(full_path));
-                asprintf(&wild_folder_path, "%s%s",
-                         config->folder_path, "\\*\0");
+                snprintf(wild_folder_path, PATH_MAX, "%s%s",
+                        folder_path, "\\*\0");
 
                 if ((hFind = FindFirstFile(wild_folder_path, &FindFileData)) != INVALID_HANDLE_VALUE) {
                     do {
                         ZeroMemory(&full_path, sizeof(full_path));
-                        asprintf(&full_path, "%s\\%s",
-                                 config->folder_path, FindFileData.cFileName);
-                        add_file_to_bucket(google_access_token, google_bucket_name, dir->d_name, full_path);
+                        snprintf(full_path, PATH_MAX, "%s\\%s",
+                                 folder_path, FindFileData.cFileName);
+                        add_file_to_bucket(google_access_token, google_bucket_name, FindFileData.cFileName, full_path);
                     } while (FindNextFile(hFind, &FindFileData));
                     FindClose(hFind);
                 }
@@ -213,7 +214,7 @@ struct StatusAndArrayCStrArray add_directory_to_bucket(const char *google_access
             while ((dir = readdir(d)) != NULL)
                 if (dir->d_type == DT_REG) {
                     memset(&full_path, 0, sizeof(full_path));
-                    asprintf(&full_path, "%s/%s",
+                    snprintf(full_path, PATH_MAX, "%s/%s",
                              folder_path, dir->d_name);
                     /* TODO: Handle errors from `add_file_to_bucket` */
                     add_file_to_bucket(google_access_token, google_bucket_name, dir->d_name, full_path);
@@ -240,29 +241,32 @@ struct StatusAndArrayCStrArray storage(const struct configuration *const config,
             )
     );
     if (strcmp(kind, "buckets") == 0 && list_only) {
-        google::cloud::storage::ListBucketsReader bucketsReader = client.ListBucketsForProject(
-                config->google_project_id);
-        std::vector<const char *> bucketNames;
-        for (const auto &bucket : bucketsReader) {
-            /* bucket->label */
-            if (!bucket) {
-                std::cerr << bucket.status().message().c_str() << std::endl;
-                exit(EXIT_FAILURE);
-            }
-            std::cout << "Bucket name: " << bucket->name() << " (\"" << bucket->name().c_str() << "\")\t"
-                      << "# of labels: " << bucket->labels().size() << std::endl;
-            bucketNames.push_back(strdup(bucket->name().c_str()));
+      google::cloud::storage::ListBucketsReader bucketsReader = client.ListBucketsForProject(config->google_project_id);
+      std::vector<const char *> bucketNames;
+      for (const auto &bucket : bucketsReader) {
+        /* bucket->label */
+        if (!bucket) {
+          fputs(bucket.status().message().c_str(), stderr);
+          return {
+              EXIT_FAILURE,
+              NULL,
+              0
+          };
         }
-        char **bucket_names_c_str = reinterpret_cast<char **>( malloc( sizeof( char * ) * bucketNames.size() ));
-        for( size_t i = 0; i < bucketNames.size(); ++i )
-            bucket_names_c_str[i] = strdup( bucketNames[i] );
+        printf("Bucket name: \"%s\"\t# of labels: %" NUM_FORMAT "\n",
+               bucket->name().c_str(), bucket->labels().size());
+        bucketNames.push_back(strdup(bucket->name().c_str()));
+      }
+      char **bucket_names_c_str = reinterpret_cast<char **>( malloc( sizeof( char * ) * bucketNames.size() ));
+      for( size_t i = 0; i < bucketNames.size(); ++i )
+        bucket_names_c_str[i] = strdup( bucketNames[i] );
 
-        const struct StatusAndArrayCStrArray bucketNamesReturn = {
-            EXIT_SUCCESS,
-            bucket_names_c_str,
-            bucketNames.size()
-        };
-        return bucketNamesReturn;
+      const struct StatusAndArrayCStrArray bucketNamesReturn = {
+          EXIT_SUCCESS,
+          bucket_names_c_str,
+          bucketNames.size()
+      };
+      return bucketNamesReturn;
     } else if (!list_only) {
         if (strcmp(kind, "bucket_create") == 0) {
             const google::cloud::StatusOr<google::cloud::storage::BucketMetadata> bucket =
@@ -271,11 +275,13 @@ struct StatusAndArrayCStrArray storage(const struct configuration *const config,
                                                            .set_location(config->google_region)
                                                            .set_storage_class(
                                                                    google::cloud::storage::storage_class::Regional()));
-            if (!bucket.ok()) {
-                std::cerr << bucket.status().message().c_str() << std::endl;
-                exit(EXIT_FAILURE);
+            struct StatusAndArrayCStrArray statusAndArrayCStrArray = {EXIT_SUCCESS, NULL, 0};
+            if (bucket.ok())
+              printf("Successfully created bucket:\t%s\n", bucket.value().id().c_str());
+            else {
+              fprintf(stderr, "Error creating bucket:\t%s\n", bucket.status().message().c_str());
+              statusAndArrayCStrArray.status = EXIT_FAILURE;
             }
-            const struct StatusAndArrayCStrArray statusAndArrayCStrArray = {EXIT_SUCCESS, NULL, 0};
             return statusAndArrayCStrArray;
         } else if (strcmp(kind, "bucket_put_from_folder") == 0) {
             /* Concurrency + some sort of directory lock? -
