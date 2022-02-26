@@ -22,7 +22,9 @@ target_include_directories(
 
 target_link_libraries("${LIBRARY_NAME}" PRIVATE "${PROJECT_NAME}_common")
 
-target_compile_options("${LIBRARY_NAME}" PRIVATE "/EHsc")
+if (MSVC)
+    target_compile_options("${LIBRARY_NAME}" PRIVATE "/EHsc")
+endif (MSVC)
 
 find_package(google_cloud_cpp_storage CONFIG REQUIRED)
 target_link_libraries(
