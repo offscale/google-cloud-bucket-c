@@ -148,12 +148,12 @@ struct StatusAndBucketCArray list_buckets(const char *google_access_token,
     bucket_c.id = bucket->id().c_str();
     bucket_c.selfLink = bucket->self_link().c_str();
     bucket_c.projectNumber = bucket->project_number();
-    bucket_c.name = bucket->name().c_str();
+    bucket_c.name = strdup(bucket->name().c_str());
     bucket_c.updated = std::chrono::system_clock::to_time_t(bucket->updated());
     bucket_c.defaultEventBasedHold = bucket->default_event_based_hold();
     bucket_c.metageneration = bucket->metageneration();
-    bucket_c.location = bucket->location().c_str();
-    bucket_c.locationType = bucket->location_type().c_str();
+    bucket_c.location = strdup(bucket->location().c_str());
+    bucket_c.locationType = strdup(bucket->location_type().c_str());
     bucket_c.rpo = bucket->rpo().c_str();
     bucket_c.storageClass = bucket->storage_class().c_str();
     bucket_c.etag = bucket->etag().c_str();
@@ -161,8 +161,9 @@ struct StatusAndBucketCArray list_buckets(const char *google_access_token,
   }
   struct BucketC *bucket_c_arr =
       reinterpret_cast<struct BucketC *>(malloc(sizeof(struct BucketC) * buckets.size()));
-  for (size_t i = 0; i < buckets.size(); ++i)
-    bucket_c_arr[i] = buckets[i];
+  std::copy(buckets.begin(), buckets.end(), bucket_c_arr);
+  /*for (size_t i = 0; i < buckets.size(); ++i)
+    bucket_c_arr[i] = buckets[i];*/
 
   const struct StatusAndBucketCArray status_and_buckets = {
       EXIT_SUCCESS, bucket_c_arr, buckets.size()};
