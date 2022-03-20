@@ -2,12 +2,12 @@
 #ifndef PP_TYPES_COMMON_H
 #define PP_TYPES_COMMON_H
 
-#ifdef	__cplusplus
+#ifdef __cplusplus
 #include <cstdlib>
 extern "C" {
 #else
-#include <stdlib.h>
 #include <gcloud_bucket_c_stdbool.h>
+#include <stdlib.h>
 #endif
 
 #if defined(_MSC_VER)
@@ -20,87 +20,85 @@ typedef SSIZE_T ssize_t;
 #include <google_cloud_bucket_c_common_export.h>
 
 struct ErrorOrType {
-    int error;
-    void *type;
+  int error;
+  void *type;
 };
 
 struct ErrorOrIntArray {
-    int error;
-    int *array;
-    size_t size;
+  int error;
+  int *array;
+  size_t size;
 };
 
 struct StatusAndCstr {
-    int status;
-    const char *c_str;
-    ssize_t size;
+  int status;
+  const char *c_str;
+  ssize_t size;
 };
 
 struct StatusAndCstrAndCStr {
-    int status;
-    const char *c_str0;
-    ssize_t size0;
-    const char *c_str1;
-    ssize_t size1;
+  int status;
+  const char *c_str0;
+  ssize_t size0;
+  const char *c_str1;
+  ssize_t size1;
 };
 
 struct StatusAndArrayCStrArray {
-    int status;
-    char *const *c_str_arr;
-    size_t size;
+  int status;
+  char *const *c_str_arr;
+  size_t size;
 };
 
 struct CStrArray {
-    char *const *arr;
-    size_t size;
+  char *const *arr;
+  size_t size;
 };
 
 struct InstanceIncomplete {
-    const char *id,
-    *creationTimestamp,
-    *name,
-    *description,
-    *machineType,
-    *statusMessage,
-    *zone,
-    *cpuPlatform,
-    *hostname,
-    *lastStartTimestamp,
-    *lastStopTimestamp,
-    *lastSuspendedTimestamp,
-    *kind;
-    // std::map<std::string, std::string> metadata;
-    bool supportsPzs;
+  const char *id, *creationTimestamp, *name, *description, *machineType,
+      *statusMessage, *zone, *cpuPlatform, *hostname, *lastStartTimestamp,
+      *lastStopTimestamp, *lastSuspendedTimestamp, *kind;
+  // std::map<std::string, std::string> metadata;
+  bool supportsPzs;
 };
 
-extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT const struct StatusAndCstr StatusAndCstrNull;
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT const struct StatusAndCstr
+    StatusAndCstrNull;
 
-extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT const struct StatusAndArrayCStrArray StatusAndArrayCStrArrayNull;
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT const struct StatusAndArrayCStrArray
+    StatusAndArrayCStrArrayNull;
 
-extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT const struct StatusAndCstrAndCStr StatusAndCstrAndCStrNull;
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT const struct StatusAndCstrAndCStr
+    StatusAndCstrAndCStrNull;
 
-extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_cstr_array(struct StatusAndArrayCStrArray *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void
+cleanup_struct_cstr_array(struct StatusAndArrayCStrArray *);
 
-extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_cstr(struct StatusAndCstr *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void
+cleanup_struct_cstr(struct StatusAndCstr *);
 
-extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_cstr_cstr(struct StatusAndCstrAndCStr *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void
+cleanup_struct_cstr_cstr(struct StatusAndCstrAndCStr *);
 
-extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_array(struct ErrorOrIntArray *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void
+cleanup_struct_array(struct ErrorOrIntArray *);
 
 struct configuration {
-    const char *google_access_token;
-    time_t google_access_token_expiry;
-    const char *google_refresh_token;
-    const char *google_project_id;
-    const char *google_bucket_name;
-    const char *google_region;
-    const char *google_zone;
-    const char *google_instance_name;
-    const char *google_instance_public_ip;
-    const char *folder_path;
+  const char *google_access_token;
+  time_t google_access_token_expiry;
+  const char *google_refresh_token;
+  const char *google_project_id;
+  const char *google_bucket_name;
+  const char *google_region;
+  const char *google_zone;
+  const char *google_instance_name;
+  const char *google_instance_public_ip;
+  const char *folder_path;
 };
 
-extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void cleanup_struct_configuration(struct configuration *);
+extern GOOGLE_CLOUD_BUCKET_C_COMMON_EXPORT void
+cleanup_struct_configuration(struct configuration *);
 
 #ifdef __cplusplus
 }
