@@ -1,6 +1,6 @@
 /* TODO: Figure out where this goes, e.g., its own repo + separate vcpkg port */
-#ifndef PP_TYPES_COMMON_H
-#define PP_TYPES_COMMON_H
+#if !defined(GCLOUD_BUCKET_C_TYPES_COMMON_H) && !defined(GOOGLE_CLOUD_C_TYPES_COMMON_H)
+#define GCLOUD_BUCKET_C_TYPES_COMMON_H
 
 #ifdef __cplusplus
 #include <cstdlib>
@@ -104,4 +104,4 @@ cleanup_struct_configuration(struct configuration *);
 }
 #endif
 
-#endif /* PP_TYPES_COMMON_H */
+#endif /* !defined(GCLOUD_BUCKET_C_TYPES_COMMON_H) && !defined(GOOGLE_CLOUD_C_TYPES_COMMON_H) */
