@@ -58,8 +58,9 @@ private:
   const google::cloud::storage::oauth2::ServiceAccountCredentialsInfo info_;
 };
 
-extern int download_file(const struct configuration *config,
-                         const char *object_name, const char *file_name) {
+extern int download_file(const struct configuration *const config,
+                         const char *const object_name,
+                         const char *const file_name) {
   static google::cloud::storage::Client client = google::cloud::storage::Client(
       std::make_unique<OutOfBandCredentials>(OutOfBandCredentials(
           config->google_access_token,
@@ -75,8 +76,33 @@ extern int download_file(const struct configuration *config,
   }
 }
 
+int upload_file_to_bucket(const char *const google_access_token,
+                          const char *const filename,
+                          const char *const bucket_name,
+                          const char *const object_name) {
+  static google::cloud::storage::Client client = google::cloud::storage::Client(
+      std::make_unique<OutOfBandCredentials>(OutOfBandCredentials(
+          google_access_token,
+          google::cloud::storage::oauth2::ServiceAccountCredentialsInfo{
+              /* TODO */})));
+  google::cloud::StatusOr<google::cloud::storage::ObjectMetadata> metadata =
+      client.UploadFile(file_name, bucket_name, object_name,
+                        google::cloud::storage::IfGenerationMatch(0));
+  if (!metadata) {
+    std::cerr << "Error creating object:\t" << metadata.status().message()
+              << std::endl;
+    return EXIT_FAILURE;
+  }
+
+  std::cout << "Uploaded " << file_name << " to object " << metadata->name()
+            << " in bucket " << metadata->bucket()
+            << "\nFull metadata: " << *metadata << "\n";
+  return EXIT_SUCCESS;
+}
+
 int upload_file_to_bucket(const struct configuration *const config,
-                          const char *object_name, const char *file_name,
+                          const char *const object_name,
+                          const char *const file_name,
                           std::vector<const char *> &uploaded,
                           google::cloud::storage::Client &client) {
   const google::cloud::StatusOr<google::cloud::storage::ObjectMetadata> status =
@@ -93,8 +119,9 @@ int upload_file_to_bucket(const struct configuration *const config,
   }
 }
 
-struct StatusAndArrayCStrArray list_bucket_names(const char *google_access_token,
-                                     const char *google_project_id) {
+struct StatusAndArrayCStrArray
+list_bucket_names(const char *const google_access_token,
+                  const char *const google_project_id) {
   static google::cloud::storage::Client client = google::cloud::storage::Client(
       std::make_unique<OutOfBandCredentials>(OutOfBandCredentials(
           google_access_token,
@@ -124,8 +151,8 @@ struct StatusAndArrayCStrArray list_bucket_names(const char *google_access_token
   return bucketNamesReturn;
 }
 
-struct StatusAndBucketCArray list_buckets(const char *google_access_token,
-                                          const char *google_project_id) {
+struct StatusAndBucketCArray list_buckets(const char *const google_access_token,
+                                          const char *const google_project_id) {
   static google::cloud::storage::Client client = google::cloud::storage::Client(
       std::make_unique<OutOfBandCredentials>(OutOfBandCredentials(
           google_access_token,
@@ -143,7 +170,7 @@ struct StatusAndBucketCArray list_buckets(const char *google_access_token,
     }
     printf("Bucket name: \"%s\"\t# of labels: %" NUM_FORMAT "\n",
            bucket->name().c_str(), bucket->labels().size());
-    struct BucketC bucket_c{};
+    struct BucketC bucket_c {};
     bucket_c.kind = bucket->kind().c_str();
     bucket_c.id = bucket->id().c_str();
     bucket_c.selfLink = bucket->self_link().c_str();
@@ -159,8 +186,8 @@ struct StatusAndBucketCArray list_buckets(const char *google_access_token,
     bucket_c.etag = bucket->etag().c_str();
     buckets.push_back(bucket_c);
   }
-  struct BucketC *bucket_c_arr =
-      reinterpret_cast<struct BucketC *>(malloc(sizeof(struct BucketC) * buckets.size()));
+  struct BucketC *bucket_c_arr = reinterpret_cast<struct BucketC *>(
+      malloc(sizeof(struct BucketC) * buckets.size()));
   std::copy(buckets.begin(), buckets.end(), bucket_c_arr);
   /*for (size_t i = 0; i < buckets.size(); ++i)
     bucket_c_arr[i] = buckets[i];*/
@@ -170,9 +197,10 @@ struct StatusAndBucketCArray list_buckets(const char *google_access_token,
   return status_and_buckets;
 }
 
-int create_bucket(const char *google_access_token,
-                  const char *google_project_id, const char *google_bucket_name,
-                  const char *google_region) {
+int create_bucket(const char *const google_access_token,
+                  const char *const google_project_id,
+                  const char *const google_bucket_name,
+                  const char *const google_region) {
   static google::cloud::storage::Client client = google::cloud::storage::Client(
       std::make_unique<OutOfBandCredentials>(OutOfBandCredentials(
           google_access_token,
@@ -196,9 +224,10 @@ int create_bucket(const char *google_access_token,
   }
 }
 
-int add_file_to_bucket(const char *google_access_token,
-                       const char *google_bucket_name, const char *object_name,
-                       const char *file_name) {
+int add_file_to_bucket(const char *const google_access_token,
+                       const char *const google_bucket_name,
+                       const char *const object_name,
+                       const char *const file_name) {
   static google::cloud::storage::Client client = google::cloud::storage::Client(
       std::make_unique<OutOfBandCredentials>(OutOfBandCredentials(
           google_access_token,
@@ -217,9 +246,9 @@ int add_file_to_bucket(const char *google_access_token,
 }
 
 struct StatusAndArrayCStrArray
-add_directory_to_bucket(const char *google_access_token,
-                        const char *google_bucket_name,
-                        const char *folder_path) {
+add_directory_to_bucket(const char *const google_access_token,
+                        const char *const google_bucket_name,
+                        const char *const folder_path) {
   /* Consider: Concurrency + some sort of directory lock? -
    * And/or compression? - (zlib stuff is already done via the google cpp
    * client) And even split into multi files, to combine with concurrency? Or go
@@ -275,7 +304,7 @@ add_directory_to_bucket(const char *google_access_token,
 }
 
 struct StatusAndArrayCStrArray storage(const struct configuration *const config,
-                                       const char *kind, bool list_only) {
+                                       const char *const kind, bool list_only) {
   static google::cloud::storage::Client client = google::cloud::storage::Client(
       std::make_unique<OutOfBandCredentials>(OutOfBandCredentials(
           config->google_access_token,

@@ -1,5 +1,6 @@
 /* TODO: Figure out where this goes, e.g., its own repo + separate vcpkg port */
-#if !defined(GCLOUD_BUCKET_C_TYPES_COMMON_H) && !defined(GOOGLE_CLOUD_C_TYPES_COMMON_H)
+#if !defined(GCLOUD_BUCKET_C_TYPES_COMMON_H) &&                                \
+    !defined(GOOGLE_CLOUD_C_TYPES_COMMON_H)
 #define GCLOUD_BUCKET_C_TYPES_COMMON_H
 
 #ifdef __cplusplus
@@ -104,4 +105,5 @@ cleanup_struct_configuration(struct configuration *);
 }
 #endif
 
-#endif /* !defined(GCLOUD_BUCKET_C_TYPES_COMMON_H) && !defined(GOOGLE_CLOUD_C_TYPES_COMMON_H) */
+#endif /* !defined(GCLOUD_BUCKET_C_TYPES_COMMON_H) &&                          \
+          !defined(GOOGLE_CLOUD_C_TYPES_COMMON_H) */

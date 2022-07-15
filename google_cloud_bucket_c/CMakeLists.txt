@@ -4,7 +4,6 @@ string(REPLACE " " "_" LIBRARY_NAME "${LIBRARY_NAME}")
 include(GenerateExportHeader)
 
 set(Header_Files "bucket.h")
-
 source_group("Header Files" FILES "${Header_Files}")
 
 set(Source_Files "bucket.cpp")
@@ -30,8 +29,7 @@ find_package(google_cloud_cpp_storage CONFIG REQUIRED)
 target_link_libraries(
         "${LIBRARY_NAME}"
         PRIVATE
-        "google-cloud-cpp::storage"
-        "google-cloud-cpp::experimental-storage-grpc"
+        "CURL::libcurl" "google-cloud-cpp::storage" "google-cloud-cpp::experimental-storage-grpc"
 )
 
 set_target_properties(
@@ -45,8 +43,8 @@ set(_export_file "${CMAKE_CURRENT_BINARY_DIR}/${LIBRARY_NAME}_export.h")
 generate_export_header("${LIBRARY_NAME}" EXPORT_FILE_NAME "${_export_file}")
 
 # setup the version numbering
-set_property(TARGET "${LIBRARY_NAME}" PROPERTY VERSION "1.0.0")
-set_property(TARGET "${LIBRARY_NAME}" PROPERTY SOVERSION "1")
+set_property(TARGET "${LIBRARY_NAME}" PROPERTY VERSION "${${PROJECT_NAME}_VERSION}")
+set_property(TARGET "${LIBRARY_NAME}" PROPERTY SOVERSION "${${PROJECT_NAME}_VERSION_MAJOR}")
 
 # install rules
 include(GNUInstallDirs)

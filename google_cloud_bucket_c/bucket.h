@@ -1,5 +1,5 @@
-#ifndef PP_BUCKET_H
-#define PP_BUCKET_H
+#ifndef GOOGLE_CLOUD_BUCKET_H
+#define GOOGLE_CLOUD_BUCKET_H
 
 #ifdef __cplusplus
 #include <cstdbool>
@@ -189,7 +189,8 @@ struct StatusAndBucketCArray {
 };
 
 extern GOOGLE_CLOUD_BUCKET_C_EXPORT struct StatusAndArrayCStrArray
-list_bucket_names(const char *google_access_token, const char *google_project_id);
+list_bucket_names(const char *google_access_token,
+                  const char *google_project_id);
 
 extern GOOGLE_CLOUD_BUCKET_C_EXPORT struct StatusAndBucketCArray
 list_buckets(const char *google_access_token, const char *google_project_id);
@@ -211,8 +212,14 @@ download_file(const struct configuration *, const char *, const char *);
 extern GOOGLE_CLOUD_BUCKET_C_EXPORT struct StatusAndArrayCStrArray
 storage(const struct configuration *, const char *, bool);
 
+/* https://googleapis.dev/cpp/google-cloud-storage/2.0.0/classgoogle_1_1cloud_1_1storage_1_1Client.html#a8da09636f0cadae59892a4a3da3c3458
+ */
+extern GOOGLE_CLOUD_BUCKET_C_EXPORT int
+upload_file_to_bucket(const char *google_access_token, const char *filename,
+                      const char *bucket_name, const char *object_name);
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif
 
-#endif /* PP_BUCKET_H */
+#endif /* !GOOGLE_CLOUD_BUCKET_H */
