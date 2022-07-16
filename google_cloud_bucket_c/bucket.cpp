@@ -60,14 +60,14 @@ private:
 
 extern int download_file(const struct configuration *const config,
                          const char *const object_name,
-                         const char *const file_name) {
+                         const char *const filename) {
   static google::cloud::storage::Client client = google::cloud::storage::Client(
       std::make_unique<OutOfBandCredentials>(OutOfBandCredentials(
           config->google_access_token,
           google::cloud::storage::oauth2::ServiceAccountCredentialsInfo{
               /* TODO */})));
   const google::cloud::Status status =
-      client.DownloadToFile(config->google_bucket_name, object_name, file_name);
+      client.DownloadToFile(config->google_bucket_name, object_name, filename);
   if (status.ok())
     return 200;
   else {
@@ -86,7 +86,7 @@ int upload_file_to_bucket(const char *const google_access_token,
           google::cloud::storage::oauth2::ServiceAccountCredentialsInfo{
               /* TODO */})));
   google::cloud::StatusOr<google::cloud::storage::ObjectMetadata> metadata =
-      client.UploadFile(file_name, bucket_name, object_name,
+      client.UploadFile(filename, bucket_name, object_name,
                         google::cloud::storage::IfGenerationMatch(0));
   if (!metadata) {
     std::cerr << "Error creating object:\t" << metadata.status().message()
@@ -102,15 +102,15 @@ int upload_file_to_bucket(const char *const google_access_token,
 
 int upload_file_to_bucket_from_config(const struct configuration *const config,
                                       const char *const object_name,
-                                      const char *const file_name,
+                                      const char *const filename,
                                       std::vector<const char *> &uploaded,
                                       google::cloud::storage::Client &client) {
   const google::cloud::StatusOr<google::cloud::storage::ObjectMetadata> status =
-      client.UploadFile(file_name, config->google_bucket_name, object_name);
+      client.UploadFile(filename, config->google_bucket_name, object_name);
   if (status.ok()) {
     std::cout << "Successfully created object:\t" << status.value().id()
               << '\n';
-    uploaded.push_back(strdup(file_name));
+    uploaded.push_back(strdup(filename));
     return EXIT_SUCCESS;
   } else {
     std::cerr << "Error creating object:\t" << status.status().message()
@@ -227,14 +227,14 @@ int create_bucket(const char *const google_access_token,
 int add_file_to_bucket(const char *const google_access_token,
                        const char *const google_bucket_name,
                        const char *const object_name,
-                       const char *const file_name) {
+                       const char *const filename) {
   static google::cloud::storage::Client client = google::cloud::storage::Client(
       std::make_unique<OutOfBandCredentials>(OutOfBandCredentials(
           google_access_token,
           google::cloud::storage::oauth2::ServiceAccountCredentialsInfo{
               /* TODO */})));
   const google::cloud::StatusOr<google::cloud::storage::ObjectMetadata> status =
-      client.UploadFile(file_name, google_bucket_name, object_name);
+      client.UploadFile(filename, google_bucket_name, object_name);
   if (status.ok()) {
     printf("Successfully created object:\t%s\n", status.value().id().c_str());
     return EXIT_SUCCESS;
@@ -377,7 +377,7 @@ struct StatusAndArrayCStrArray storage(const struct configuration *const config,
             strcat_s(full_path, PATH_MAX, FindFileData.cFileName);
             upload_file_to_bucket_from_config(/* config */ config,
                                   /* object_name*/ FindFileData.cFileName,
-                                  /* file_name */ full_path,
+                                  /* filename */ full_path,
                                   /* uploaded */ uploaded,
                                   /* client */ client);
           } while (FindNextFile(hFind, &FindFileData));
@@ -397,7 +397,7 @@ struct StatusAndArrayCStrArray storage(const struct configuration *const config,
               strcat(full_path, dir->d_name);
               upload_file_to_bucket_from_config(/* config */ config,
                                     /* object_name*/ dir->d_name,
-                                    /* file_name */ full_path,
+                                    /* filename */ full_path,
                                     /* uploaded */ uploaded,
                                     /* client */ client);
             }

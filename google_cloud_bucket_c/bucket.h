@@ -201,7 +201,7 @@ create_bucket(const char *google_access_token, const char *google_project_id,
 extern GOOGLE_CLOUD_BUCKET_C_EXPORT int
 add_file_to_bucket(const char *google_access_token,
                    const char *google_bucket_name, const char *object_name,
-                   const char *file_name);
+                   const char *filename);
 extern GOOGLE_CLOUD_BUCKET_C_EXPORT struct StatusAndArrayCStrArray
 add_directory_to_bucket(const char *google_access_token,
                         const char *google_bucket_name,
