@@ -100,11 +100,11 @@ int upload_file_to_bucket(const char *const google_access_token,
   return EXIT_SUCCESS;
 }
 
-int upload_file_to_bucket(const struct configuration *const config,
-                          const char *const object_name,
-                          const char *const file_name,
-                          std::vector<const char *> &uploaded,
-                          google::cloud::storage::Client &client) {
+int upload_file_to_bucket_from_config(const struct configuration *const config,
+                                      const char *const object_name,
+                                      const char *const file_name,
+                                      std::vector<const char *> &uploaded,
+                                      google::cloud::storage::Client &client) {
   const google::cloud::StatusOr<google::cloud::storage::ObjectMetadata> status =
       client.UploadFile(file_name, config->google_bucket_name, object_name);
   if (status.ok()) {
@@ -375,7 +375,7 @@ struct StatusAndArrayCStrArray storage(const struct configuration *const config,
             strcpy_s(full_path, PATH_MAX, config->folder_path);
             strcat_s(full_path, PATH_MAX, "\\");
             strcat_s(full_path, PATH_MAX, FindFileData.cFileName);
-            upload_file_to_bucket(/* config */ config,
+            upload_file_to_bucket_from_config(/* config */ config,
                                   /* object_name*/ FindFileData.cFileName,
                                   /* file_name */ full_path,
                                   /* uploaded */ uploaded,
@@ -395,7 +395,7 @@ struct StatusAndArrayCStrArray storage(const struct configuration *const config,
               strcpy(full_path, config->folder_path);
               strcat(full_path, "/");
               strcat(full_path, dir->d_name);
-              upload_file_to_bucket(/* config */ config,
+              upload_file_to_bucket_from_config(/* config */ config,
                                     /* object_name*/ dir->d_name,
                                     /* file_name */ full_path,
                                     /* uploaded */ uploaded,

@@ -220,6 +220,6 @@ upload_file_to_bucket(const char *google_access_token, const char *filename,
 
 #ifdef __cplusplus
 } /*extern "C"*/
-#endif
+#endif /*__cplusplus*/
 
 #endif /* !GOOGLE_CLOUD_BUCKET_H */
