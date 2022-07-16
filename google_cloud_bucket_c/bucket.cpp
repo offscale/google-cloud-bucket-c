@@ -94,7 +94,7 @@ int upload_file_to_bucket(const char *const google_access_token,
     return EXIT_FAILURE;
   }
 
-  std::cout << "Uploaded " << file_name << " to object " << metadata->name()
+  std::cout << "Uploaded " << filename << " to object " << metadata->name()
             << " in bucket " << metadata->bucket()
             << "\nFull metadata: " << *metadata << "\n";
   return EXIT_SUCCESS;
